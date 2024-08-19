@@ -1,6 +1,6 @@
 package store
 
-type User struct {
+/* type User struct {
 	ID       uint   `gorm:"primaryKey" json:"id"`
 	Email    string `json:"email"`
 	Password string `json:"-"`
@@ -22,3 +22,4 @@ type SessionStore interface {
 	CreateSession(session *Session) (*Session, error)
 	GetUserFromSession(sessionID string, userID string) (*User, error)
 }
+ */

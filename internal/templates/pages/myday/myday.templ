@@ -1,0 +1,17 @@
+package myday
+
+import (
+	"net/http"
+
+	"lvm/internal/templates/layouts"
+	)
+
+templ MyDayPage(r *http.Request) {
+	@layouts.Base("My day page", r) {
+		@MyDay()
+	}
+}
+
+templ MyDay() {
+		Welcome, here you can find what tasks you need to do today!
+}

@@ -1,7 +1,7 @@
 package db
 
 import (
-	"goth/internal/store"
+	//"lvm/internal/store"
 	"os"
 
 	"gorm.io/driver/sqlite" // Sqlite driver based on CGO
@@ -23,7 +23,7 @@ func open(dbName string) (*gorm.DB, error) {
 func MustOpen(dbName string) *gorm.DB {
 
 	if dbName == "" {
-		dbName = "goth.db"
+		dbName = "lvm.db"
 	}
 
 	db, err := open(dbName)
@@ -31,7 +31,7 @@ func MustOpen(dbName string) *gorm.DB {
 		panic(err)
 	}
 
-	err = db.AutoMigrate(&store.User{}, &store.Session{})
+	//err = db.AutoMigrate(&store.User{}, &store.Session{})
 
 	if err != nil {
 		panic(err)

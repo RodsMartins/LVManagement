@@ -1,0 +1,12 @@
+package pages
+import (
+	"net/http"
+
+	"lvm/internal/templates/layouts"
+	)
+
+templ NotFound(r *http.Request) {
+	@layouts.Base("404", r) {	
+		<h1>404</h1>
+	}
+}

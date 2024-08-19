@@ -1,0 +1,16 @@
+package farm
+
+import (
+	"lvm/internal/templates/layouts"
+	"net/http"
+)
+
+templ NewCropPage(r *http.Request) {
+	@layouts.Base("Plant crops page", r) {
+		@NewCrop()
+	}
+}
+
+templ NewCrop() {
+	<p>Welcome, here you plan your crops!</p>
+}

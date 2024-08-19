@@ -1,12 +1,12 @@
 package mock
 
 import (
-	"goth/internal/store"
+/* 	"lvm/internal/store"
 
-	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/mock" */
 )
 
-type UserStoreMock struct {
+/* type UserStoreMock struct {
 	mock.Mock
 }
 
@@ -33,4 +33,4 @@ func (m *SessionStoreMock) CreateSession(session *store.Session) (*store.Session
 func (m *SessionStoreMock) GetUserFromSession(sessionID string, userID string) (*store.User, error) {
 	args := m.Called(sessionID, userID)
 	return args.Get(0).(*store.User), args.Error(1)
-}
+} */

@@ -3,19 +3,20 @@ package main
 import (
 	"context"
 	"errors"
-	"goth/internal/config"
-	"goth/internal/handlers"
-	"goth/internal/hash/passwordhash"
-	database "goth/internal/store/db"
-	"goth/internal/store/dbstore"
 	"log/slog"
+	"lvm/internal/config"
+	"lvm/internal/handlers"
+	"lvm/internal/routes"
+
+	//database "lvm/internal/store/db"
+	//"lvm/internal/store/dbstore"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	m "goth/internal/middleware"
+	m "lvm/internal/middleware"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -37,59 +38,24 @@ func main() {
 
 	cfg := config.MustLoadConfig()
 
-	db := database.MustOpen(cfg.DatabaseName)
-	passwordhash := passwordhash.NewHPasswordHash()
-
-	userStore := dbstore.NewUserStore(
-		dbstore.NewUserStoreParams{
-			DB:           db,
-			PasswordHash: passwordhash,
-		},
-	)
-
-	sessionStore := dbstore.NewSessionStore(
-		dbstore.NewSessionStoreParams{
-			DB: db,
-		},
-	)
+	//db := database.MustOpen(cfg.DatabaseName)
 
 	fileServer := http.FileServer(http.Dir("./static"))
 	r.Handle("/static/*", http.StripPrefix("/static/", fileServer))
-
-	authMiddleware := m.NewAuthMiddleware(sessionStore, cfg.SessionCookieName)
-
 	r.Group(func(r chi.Router) {
 		r.Use(
 			middleware.Logger,
 			m.TextHTMLMiddleware,
 			m.CSPMiddleware,
-			authMiddleware.AddUserToContext,
 		)
 
-		r.NotFound(handlers.NewNotFoundHandler().ServeHTTP)
+		r.Handle("/", http.RedirectHandler("/my-day", http.StatusPermanentRedirect))
 
-		r.Get("/", handlers.NewHomeHandler().ServeHTTP)
+		notFoundHandler := handlers.NotFoundHandler{}
+		r.NotFound(notFoundHandler.NotFound)
 
-		r.Get("/about", handlers.NewAboutHandler().ServeHTTP)
-
-		r.Get("/register", handlers.NewGetRegisterHandler().ServeHTTP)
-
-		r.Post("/register", handlers.NewPostRegisterHandler(handlers.PostRegisterHandlerParams{
-			UserStore: userStore,
-		}).ServeHTTP)
-
-		r.Get("/login", handlers.NewGetLoginHandler().ServeHTTP)
-
-		r.Post("/login", handlers.NewPostLoginHandler(handlers.PostLoginHandlerParams{
-			UserStore:         userStore,
-			SessionStore:      sessionStore,
-			PasswordHash:      passwordhash,
-			SessionCookieName: cfg.SessionCookieName,
-		}).ServeHTTP)
-
-		r.Post("/logout", handlers.NewPostLogoutHandler(handlers.PostLogoutHandlerParams{
-			SessionCookieName: cfg.SessionCookieName,
-		}).ServeHTTP)
+		r.Mount("/my-day", routes.MyDayRoutes())
+		r.Mount("/farm", routes.FarmRoutes())
 	})
 
 	killSig := make(chan os.Signal, 1)

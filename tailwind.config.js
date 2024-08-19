@@ -4,6 +4,8 @@ const colors = require('tailwindcss/colors')
 module.exports = {
   content: [
     'internal/templates/*.templ',
+    'internal/templates/*/*.templ',
+    'internal/templates/*/*/*.templ',
   ],
   theme: {
     container: {
@@ -16,11 +18,11 @@ module.exports = {
       },
     },
     extend: {
-      colors: {
-        primary: colors.blue,
-        secondary: colors.yellow,
-        neutral: colors.gray,
-      }
+      backgroundColor: theme => ({
+        primary: '#38a169',
+        secondary: '#ffed4a',
+        danger: '#e3342f',
+      }),
     },
   },
   plugins: [
