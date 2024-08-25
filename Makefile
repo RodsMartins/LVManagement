@@ -16,7 +16,12 @@ templ-watch:
 	
 .PHONY: dev
 dev:
+	make containers
 	go build -o ./tmp/$(APP_NAME) ./cmd/$(APP_NAME)/main.go && air
+
+.PHONY: containers
+db:
+	docker compose up -d
 
 .PHONY: build
 build:
@@ -32,6 +37,10 @@ vet:
 staticcheck:
 	staticcheck ./...
 
+PHONY: db-init
+db-init:
+	docker compose exec -T db psql -Upostgres -dlvm < schema.sql
+
 .PHONY: test
 test:
-	  go test -race -v -timeout 30s ./...
+	go test -race -v -timeout 30s ./...

@@ -3,7 +3,10 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
+	"log"
 	"log/slog"
+	"lvm/database"
 	"lvm/internal/config"
 	"lvm/internal/handlers"
 	"lvm/internal/routes"
@@ -20,6 +23,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 /*
@@ -38,7 +44,37 @@ func main() {
 
 	cfg := config.MustLoadConfig()
 
-	//db := database.MustOpen(cfg.DatabaseName)
+	ctx := context.Background()
+
+	conn, err := pgx.Connect(ctx, cfg.DATABASE_URL)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
+	}
+	defer conn.Close(ctx)
+
+	queries := database.New(conn)
+
+	insertedAuthor, err := queries.CreateTmp(ctx, database.CreateTmpParams{
+		FertilizerID: pgtype.UUID{Bytes: uuid.New(), Valid: true},
+		Name:         pgtype.Text{String: "Hello Helene", Valid: true},
+	})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
+	}
+	log.Println(insertedAuthor)
+	fmt.Println(insertedAuthor)
+
+	//var name string
+	//var weight int64
+	//err = conn.QueryRow(context.Background(), "select * from widgets where id=$1", 42).Scan(&name, &weight)
+	//if err != nil {
+	//	fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+	//	os.Exit(1)
+	//}
+
+	//fmt.Println(name, weight)
 
 	fileServer := http.FileServer(http.Dir("./static"))
 	r.Handle("/static/*", http.StripPrefix("/static/", fileServer))

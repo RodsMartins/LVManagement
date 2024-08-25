@@ -4,10 +4,16 @@ services:
     restart: always
     environment:
       POSTGRES_DB: lvm
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     volumes:
-      - pgdata:/var/lib/postgresql/data 
- 
+      - pgdata:/var/lib/postgresql/data
+  adminer:
+    image: adminer
+    hostname: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - 8080:8080
 volumes:
   pgdata:
