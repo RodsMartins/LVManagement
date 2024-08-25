@@ -1,0 +1,13 @@
+package ui
+
+templ Grid(cols string) {
+	<div class={ "mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-" + cols }>
+		{ children... }
+	</div>
+}
+
+templ GridCol(cols string) {
+	<div class={ "sm:col-span-" + cols }>
+		{ children... }
+	</div>
+}

@@ -17,13 +17,10 @@ module.exports = {
         desktop: "5rem",
       },
     },
-    extend: {
-      backgroundColor: theme => ({
-        primary: '#38a169',
-        secondary: '#ffed4a',
-        danger: '#e3342f',
-      }),
-    },
+    colors: {
+      primary: '#38a169',
+      secondary: '#ffed4a',
+    }
   },
   plugins: [
     require('@tailwindcss/forms'),

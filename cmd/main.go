@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	//"log"
 	"log/slog"
-	"lvm/database"
+	//"lvm/database"
 	"lvm/internal/config"
 	"lvm/internal/handlers"
 	"lvm/internal/routes"
@@ -23,9 +23,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/google/uuid"
+	//"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
+	//"github.com/jackc/pgx/v5/pgtype"
 )
 
 /*
@@ -53,18 +53,18 @@ func main() {
 	}
 	defer conn.Close(ctx)
 
-	queries := database.New(conn)
+	//queries := database.New(conn)
 
-	insertedAuthor, err := queries.CreateTmp(ctx, database.CreateTmpParams{
-		FertilizerID: pgtype.UUID{Bytes: uuid.New(), Valid: true},
-		Name:         pgtype.Text{String: "Hello Helene", Valid: true},
-	})
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		os.Exit(1)
-	}
-	log.Println(insertedAuthor)
-	fmt.Println(insertedAuthor)
+	//insertedAuthor, err := queries.CreateTmp(ctx, database.CreateTmpParams{
+	//	FertilizerID: pgtype.UUID{Bytes: uuid.New(), Valid: true},
+	//	Name:         pgtype.Text{String: "Hello Helene", Valid: true},
+	//})
+	//if err != nil {
+	//	fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+	//	os.Exit(1)
+	//}
+	//log.Println(insertedAuthor)
+	//fmt.Println(insertedAuthor)
 
 	//var name string
 	//var weight int64
