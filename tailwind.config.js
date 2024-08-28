@@ -3,9 +3,7 @@ const colors = require('tailwindcss/colors')
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    'internal/templates/*.templ',
-    'internal/templates/*/*.templ',
-    'internal/templates/*/*/*.templ',
+    'internal/templates/**/*.templ',
   ],
   theme: {
     container: {
@@ -17,9 +15,11 @@ module.exports = {
         desktop: "5rem",
       },
     },
-    colors: {
-      primary: '#38a169',
-      secondary: '#ffed4a',
+    extends: {
+      colors: {
+        primary: '#38a169',
+        secondary: '#ffed4a',
+      }
     }
   },
   plugins: [

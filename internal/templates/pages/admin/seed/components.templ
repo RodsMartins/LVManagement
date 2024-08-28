@@ -1,0 +1,25 @@
+package seeds
+
+templ Header(text string, url string) {
+	<button
+		type="button"
+		hx-target="#page-content"
+		hx-get={ url }
+		hx-swap="innerHTML"
+		hx-replace-url="true"
+		class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+	>
+		{ text }
+	</button>
+}
+
+templ Container(text string, url string) {
+    <div class="flex flex-col gap-10">
+			<div>
+				@Header(text, url)
+			</div>
+			<div class="w-1/2">
+				{ children... }
+			</div>
+		</div>
+}

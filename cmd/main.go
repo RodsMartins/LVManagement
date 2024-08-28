@@ -6,7 +6,7 @@ import (
 	"fmt"
 	//"log"
 	"log/slog"
-	//"lvm/database"
+	"lvm/database"
 	"lvm/internal/config"
 	"lvm/internal/handlers"
 	"lvm/internal/routes"
@@ -53,7 +53,7 @@ func main() {
 	}
 	defer conn.Close(ctx)
 
-	//queries := database.New(conn)
+	repository := database.New(conn)
 
 	//insertedAuthor, err := queries.CreateTmp(ctx, database.CreateTmpParams{
 	//	FertilizerID: pgtype.UUID{Bytes: uuid.New(), Valid: true},
@@ -92,6 +92,7 @@ func main() {
 
 		r.Mount("/my-day", routes.MyDayRoutes())
 		r.Mount("/farm", routes.FarmRoutes())
+		r.Mount("/admin", routes.AdminRoutes(repository))
 	})
 
 	killSig := make(chan os.Signal, 1)

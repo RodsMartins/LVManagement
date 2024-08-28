@@ -8,6 +8,9 @@ services:
       POSTGRES_PASSWORD: postgres
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      default:
+        ipv4_address: 172.21.0.3
   adminer:
     image: adminer
     hostname: adminer
@@ -17,3 +20,14 @@ services:
       - 8080:8080
 volumes:
   pgdata:
+ 
+networks:
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "false"
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.21.0.0/24
+        gateway: 172.21.0.1
