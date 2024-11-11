@@ -1,16 +1,27 @@
 package farm
 
 import (
+	"lvm/internal/templates/components/form"
+	"lvm/internal/templates/components/ui"
 	"lvm/internal/templates/layouts"
 	"net/http"
+	//"lvm/internal/helpers"
 )
 
-templ NewCropPage(r *http.Request) {
-	@layouts.Base("Plant crops page", r) {
-		@NewCrop()
+templ CropForm(r *http.Request, seedOptions []form.SelectOption) {
+	@layouts.Base("Create order page", r) {
+		@ui.H2("Create an order")
+		<div class="w-3/4">
+			<form
+				hx-post="/farm/crops/new"
+				hx-swap="none"
+				class="space-y-4"
+			>
+				@form.SelectInput("Select a seed", "Select a seed to plant", seedOptions, "seed")
+				@form.DateTimeTogglePicker("Date of sowing/harvest", "Choose a date and select whether it is a sowing or harvest date", "Harvest date", "datetime-toggle-picker")
+				@form.NumberInput("Select yield", "Select the desired yield in grams", "", "quantity")
+				@form.SubmitButton("Create order")
+			</form>
+		</div>
 	}
-}
-
-templ NewCrop() {
-	<p>Welcome, here you plan your crops!</p>
 }

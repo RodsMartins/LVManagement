@@ -41,6 +41,11 @@ PHONY: db-init
 db-init:
 	docker compose exec -T db psql -Upostgres -dlvm < schema.sql
 
+.PHONY: db-reset
+db-reset:
+	docker compose exec -T db psql -Upostgres -dlvm -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+	make db-init
+
 .PHONY: test
 test:
 	go test -race -v -timeout 30s ./...

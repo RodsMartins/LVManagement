@@ -11,6 +11,31 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const deleteSeed = `-- name: DeleteSeed :execrows
+DELETE FROM Seeds
+WHERE seed_id = $1
+`
+
+func (q *Queries) DeleteSeed(ctx context.Context, seedID pgtype.UUID) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteSeed, seedID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const getSeed = `-- name: GetSeed :one
+SELECT seed_id, name, type FROM Seeds
+WHERE seed_id = $1
+`
+
+func (q *Queries) GetSeed(ctx context.Context, seedID pgtype.UUID) (Seed, error) {
+	row := q.db.QueryRow(ctx, getSeed, seedID)
+	var i Seed
+	err := row.Scan(&i.SeedID, &i.Name, &i.Type)
+	return i, err
+}
+
 const listSeeds = `-- name: ListSeeds :many
 SELECT seed_id, name, type FROM Seeds
 `
@@ -52,4 +77,21 @@ func (q *Queries) NewSeed(ctx context.Context, arg NewSeedParams) (Seed, error) 
 	var i Seed
 	err := row.Scan(&i.SeedID, &i.Name, &i.Type)
 	return i, err
+}
+
+const updateSeed = `-- name: UpdateSeed :exec
+UPDATE Seeds
+SET name = $1, type = $2
+WHERE seed_id = $3
+`
+
+type UpdateSeedParams struct {
+	Name   pgtype.Text
+	Type   pgtype.Text
+	SeedID pgtype.UUID
+}
+
+func (q *Queries) UpdateSeed(ctx context.Context, arg UpdateSeedParams) error {
+	_, err := q.db.Exec(ctx, updateSeed, arg.Name, arg.Type, arg.SeedID)
+	return err
 }

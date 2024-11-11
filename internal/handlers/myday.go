@@ -6,8 +6,6 @@ import (
 
 	pages "lvm/internal/templates/pages/myday"
 	"net/http"
-
-	"github.com/a-h/templ"
 )
 
 type MyDayHandler struct {
@@ -15,12 +13,7 @@ type MyDayHandler struct {
 }
 
 func (h MyDayHandler) Index(w http.ResponseWriter, r *http.Request) {
-	var template templ.Component
-	if h.BaseHandler.UsesHtmx(r) {
-		template = pages.MyDay()
-	} else {
-		template = pages.MyDayPage(r)
-	}
+	template := pages.MyDay(r)
 	
 	err := template.Render(r.Context(), w)
 

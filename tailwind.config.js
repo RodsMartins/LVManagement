@@ -6,6 +6,11 @@ module.exports = {
     'internal/templates/**/*.templ',
   ],
   theme: {
+    extend: {
+      colors: {
+        primary: '#38a169',
+      },
+    },
     container: {
       center: true,
       padding: {
@@ -15,12 +20,6 @@ module.exports = {
         desktop: "5rem",
       },
     },
-    extends: {
-      colors: {
-        primary: '#38a169',
-        secondary: '#ffed4a',
-      }
-    }
   },
   plugins: [
     require('@tailwindcss/forms'),

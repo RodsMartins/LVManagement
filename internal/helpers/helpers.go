@@ -38,3 +38,18 @@ func GenerateSafeUrl(url string, uuid pgtype.UUID) templ.SafeURL {
 func GenerateUrl(url string, uuid pgtype.UUID) string {
 	return fmt.Sprintf(url, encodeUUID(uuid.Bytes))
 }
+
+func Ternary(condition bool, valueIfTrue, valueIfFalse interface{}) interface{} {
+    if condition {
+        return valueIfTrue
+    }
+    return valueIfFalse
+}
+
+
+func TernaryString(condition bool, valueIfTrue string, valueIfFalse string) string {
+    if condition {
+        return valueIfTrue
+    }
+    return valueIfFalse
+}

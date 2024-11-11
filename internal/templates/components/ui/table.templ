@@ -1,0 +1,30 @@
+package ui
+
+templ Table(columns []string) {
+	<div class="overflow-x-auto">
+		<table class="min-w-full bg-white border border-gray-200">
+			<thead class="bg-gray-200">
+				<tr>
+					for _, column := range columns {
+						<th class="text-left py-3 px-4 font-semibold text-gray-700 border-b">{ column } </th>
+					}
+				</tr>
+			</thead>
+			<tbody>
+				{ children... }
+			</tbody>
+		</table>
+	</div>
+}
+
+templ TableRow() {
+    <tr class="hover:bg-gray-100 transition-colors">
+        { children... }
+    </tr>
+}
+
+templ TableData() {
+    <td class="py-3 px-4 border-b text-gray-800">
+        { children... }
+    </td>
+}

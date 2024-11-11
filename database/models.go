@@ -12,11 +12,12 @@ type Crop struct {
 	CropID        pgtype.UUID
 	SeedID        pgtype.UUID
 	SoakingStart  pgtype.Timestamp
-	SoakingEnd    pgtype.Timestamp
 	StackingStart pgtype.Timestamp
-	StackingEnd   pgtype.Timestamp
+	BlackoutStart pgtype.Timestamp
 	LightsStart   pgtype.Timestamp
-	LightsEnd     pgtype.Timestamp
+	Harvest       pgtype.Timestamp
+	Code          pgtype.Text
+	YieldGrams    pgtype.Int4
 }
 
 type Fertilizer struct {

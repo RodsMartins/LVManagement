@@ -19,8 +19,6 @@ import (
 	"syscall"
 	"time"
 
-	m "lvm/internal/middleware"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	//"github.com/google/uuid"
@@ -81,8 +79,6 @@ func main() {
 	r.Group(func(r chi.Router) {
 		r.Use(
 			middleware.Logger,
-			m.TextHTMLMiddleware,
-			m.CSPMiddleware,
 		)
 
 		r.Handle("/", http.RedirectHandler("/my-day", http.StatusPermanentRedirect))
@@ -91,7 +87,7 @@ func main() {
 		r.NotFound(notFoundHandler.NotFound)
 
 		r.Mount("/my-day", routes.MyDayRoutes())
-		r.Mount("/farm", routes.FarmRoutes())
+		r.Mount("/farm", routes.FarmRoutes(repository))
 		r.Mount("/admin", routes.AdminRoutes(repository))
 	})
 

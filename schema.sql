@@ -74,11 +74,12 @@ CREATE TABLE IF NOT EXISTS crops (
   crop_id uuid PRIMARY KEY,
   seed_id uuid,
   soaking_start timestamp,
-  soaking_end timestamp,
   stacking_start timestamp,
-  stacking_end timestamp,
+  blackout_start timestamp,
   lights_start timestamp,
-  lights_end timestamp,
+  harvest timestamp,
+  code varchar,
+  yield_grams int null,
   FOREIGN KEY (seed_id) REFERENCES seeds (seed_id)
 );
 

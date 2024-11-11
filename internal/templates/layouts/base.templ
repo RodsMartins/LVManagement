@@ -1,7 +1,6 @@
 package layouts
 
 import (
-	"lvm/internal/middleware"
 	"net/http"
 	"os"
 )
@@ -23,13 +22,15 @@ templ header(title string) {
 		<title>{ title }</title>
 		<meta charset="UTF-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<script src="/static/script/htmx.min.js" nonce={ middleware.GetHtmxNonce(ctx) }></script>
-		<script src="/static/script/response-targets.js" nonce={ middleware.GetResponseTargetsNonce(ctx) }></script>
+		<script src="/static/script/htmx.min.js"></script>
+		<script src="/static/script/response-targets.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>
 		if os.Getenv("env") == "production" {
-			<link rel="stylesheet" href="/static/css/style.min.css" nonce={ middleware.GetTwNonce(ctx) }/>
+			<link rel="stylesheet" href="/static/css/style.min.css"/>
 		} else {
-			<link rel="stylesheet" href="/static/css/style.css" nonce={ middleware.GetTwNonce(ctx) }/>
+			<link rel="stylesheet" href="/static/css/style.css"/>
 		}
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css"/>
 	</head>
 }
 
@@ -48,7 +49,7 @@ templ nav(r *http.Request) {
 				<nav class="flex-1 space-y-2">
 					@navButton("My day", "/my-day", HouseIcon, r)
 					@navButton("Crops", "/farm", CarrotIcon, r)
-					@navButton("Plant a crop", "/farm/new/crop", TractorIcon, r)
+					@navButton("Create an order", "/farm/crops/upsert", TractorIcon, r)
 				</nav>
 				<hr class="border-gray-200"/>
 				<nav class="flex-1 space-y-2">
@@ -61,10 +62,7 @@ templ nav(r *http.Request) {
 
 templ navButton(text string, link string, svgPath string, r *http.Request) {
 	<a
-		hx-target="#page-content"
-		hx-get={ link }
-		hx-swap="innerHTML"
-		hx-replace-url="true"
+		href={ templ.SafeURL(link) }
 		title=""
 		if GetCurrentPage(r) == link {
 			class={ HighlightButtonClass }
@@ -72,7 +70,7 @@ templ navButton(text string, link string, svgPath string, r *http.Request) {
 			class={ ButtonClass }
 		}
 	>
-		<svg class="flex-shrink-0 w-5 h-5 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+		<svg class="flex-shrink-0 w-5 h-5 mr-4" viewBox="0 0 576 512">
 			<path d={ svgPath }></path>
 		</svg>
 		{ text }

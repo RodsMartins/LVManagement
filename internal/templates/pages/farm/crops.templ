@@ -1,41 +1,12 @@
 package farm
 
 import (
-	"lvm/internal/templates/components/ui"
-	"lvm/internal/templates/components/form"
 	"lvm/internal/templates/layouts"
 	"net/http"
 )
 
-templ CropsPage(r *http.Request) {
+templ Crops(r *http.Request) {
 	@layouts.Base("Crops Page", r) {
-		@Crops()
+		<h1>List of crops!</h1>
 	}
-}
-
-templ Crops() {
-	<form>
-	<div class="flex">
-		<div class="pb-12 w-1/2">
-			@ui.Title("Plant a crop")
-			@ui.Grid("6") {
-				@ui.GridCol("3") {
-					@form.Select("Seed", []string{"Radish", "Sunflower", "Green Pea", "Brocoli"})
-				}
-				@ui.GridCol("3") {
-					<label for="last-name" class="block text-sm font-medium leading-6 text-gray-900">Last name</label>
-					<div class="mt-2">
-						<input type="text" name="last-name" id="last-name" autocomplete="family-name" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"/>
-					</div>
-				}
-				@ui.GridCol("4") {
-					<label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email address</label>
-					<div class="mt-2">
-						<input id="email" name="email" type="email" autocomplete="email" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"/>
-					</div>
-				}
-			}
-		</div>
-	</div>
-	</form>
 }

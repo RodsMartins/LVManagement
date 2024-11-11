@@ -1,0 +1,56 @@
+package seeds
+
+import (
+	"lvm/internal/templates/layouts"
+	"lvm/internal/templates/components/form"
+	"lvm/internal/templates/pages/admin"
+	"lvm/internal/dtos"
+
+	"lvm/internal/templates/components/ui"
+	"net/http"
+	"lvm/internal/helpers"
+	"strconv"
+	"github.com/google/uuid"
+)
+
+templ UpsertSeedPage(seed dtos.Seed, seedInstruction dtos.SeedInstruction, r *http.Request) {
+	@layouts.Base("New seed", r) {
+		@UpsertSeed(seed, seedInstruction)
+	}
+}
+
+templ UpsertSeed(seed dtos.Seed, seedInstruction dtos.SeedInstruction) {
+	@admin.Container("Back", "/admin/seeds") {
+		@ui.H2("Create a Seed")
+		<form
+			hx-target="#page-content"
+			hx-swap="innerHTML"
+			hx-replace-url="true"
+			if (seed.SeedID.String() != uuid.Nil.String()) {
+				hx-patch={ "/admin/seeds/" + seed.SeedID.String() }
+			} else {
+				hx-post="/admin/seeds/new"
+			}
+			hx-push-url="/admin/seeds"
+			class="space-y-4"
+		>
+			@form.TextInput("Seed Name", "The name of the seed refers to the general category or species.", seed.Name, "name")
+			@form.TextInput("Variety Type", "The type of the seed specifies the variety within the category.", seed.Type, "type")
+			@ui.Line()	
+			@ui.H3("Seed Instructions")
+			<div class="grid grid-cols-2 gap-4">
+				@form.NumberInput("Seed Grams", "The weight of the seed in grams.", strconv.Itoa(seedInstruction.SeedGrams), "seedGrams")
+				@form.NumberInput("Soaking Hours", "The number of hours the seed needs to be soaked.", strconv.Itoa(seedInstruction.SoakingHours), "soakingHours")
+				@form.NumberInput("Stacking Hours", "The number of hours the seed needs to be stacked.", strconv.Itoa(seedInstruction.StackingHours), "stackingHours")
+				@form.NumberInput("Blackout Hours", "The number of hours the seed needs to be kept in darkness.", strconv.Itoa(seedInstruction.BlackoutHours), "blackoutHours")
+				@form.NumberInput("Lights Hours", "The number of hours the seed needs to be exposed to light.", strconv.Itoa(seedInstruction.LightsHours), "lightsHours")
+				@form.NumberInput("Yield Grams", "The weight of the seed yield in grams.", strconv.Itoa(seedInstruction.YieldGrams), "yieldGrams")
+			</div>
+			@form.TextArea("Special Treatment", "Any special treatment required for the seed.", seedInstruction.SpecialTreatment, "specialTreatment", "Write if there is any special treatment required for the seed.")
+
+			@form.SubmitButton(helpers.TernaryString(seed.SeedID.String() != uuid.Nil.String(), "Update Seed", "Create Seed"))
+		</form>
+		<!-- Response Container -->
+		<div id="response" class="mt-4"></div>
+	}
+}

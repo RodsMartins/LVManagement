@@ -1,8 +1,8 @@
 package db
 
 import (
-	"github.com/google/uuid"
 	"database/sql"
+	"github.com/google/uuid"
 	//"time"
 )
 
@@ -25,14 +25,13 @@ type SeedInstructions struct {
 }
 
 type Crop struct {
-	ID            uuid.UUID `json:"id"`
-	Seed          uuid.UUID `json:"seed"`
+	ID            uuid.UUID    `json:"id"`
+	Seed          uuid.UUID    `json:"seed"`
 	SoakingStart  sql.NullTime `json:"soaking_start"`
-	SoakingEnd    sql.NullTime `json:"soaking_end"`
 	StackingStart sql.NullTime `json:"stacking_start"`
-	StackingEnd   sql.NullTime `json:"stacking_end"`
 	LightsStart   sql.NullTime `json:"lights_start"`
-	LightsEnd     sql.NullTime `json:"lights_end"`
+	Havest        sql.NullTime `json:"lights_end"`
+	Yield         int          `json:"yield"`
 }
 
 // Watering represents a watering event.
