@@ -37,3 +37,11 @@ func (s Seed) ToNewSeedParams() database.NewSeedParams {
 		Type: pgtype.Text{String: s.Type, Valid: true},
 	}
 }
+
+func (s Seed) ToUpdateSeedParams() database.UpdateSeedParams {
+	return database.UpdateSeedParams{
+		SeedID: pgtype.UUID{Bytes: s.SeedID, Valid: true},
+		Name: pgtype.Text{String: s.Name, Valid: true},
+		Type: pgtype.Text{String: s.Type, Valid: true},
+	}
+}

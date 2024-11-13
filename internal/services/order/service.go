@@ -1,10 +1,9 @@
-package services
+package order
 
 import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"lvm/internal/db/repositories"
 	"lvm/internal/dtos"
 	formDtos "lvm/internal/dtos/form"
@@ -20,16 +19,20 @@ type OrderService struct {
 	codeGenerator             *CodeGenerator
 	seedRepository            repositories.SeedRepository
 	seedInstructionRepository repositories.SeedInstructionRepository
+	cropRepository            repositories.CropRepository
 }
 
 // NewOrderService creates a new OrderService
 func NewOrderService(
 	SeedRepository repositories.SeedRepository,
 	SeedInstructionsRepository repositories.SeedInstructionRepository,
+	CropRepository repositories.CropRepository,
 ) *OrderService {
 	return &OrderService{
-		codeGenerator:  NewCodeGenerator(SeedRepository, SeedInstructionsRepository),
-		seedRepository: SeedRepository,
+		codeGenerator:             newCodeGenerator(SeedRepository, CropRepository),
+		seedRepository:            SeedRepository,
+		seedInstructionRepository: SeedInstructionsRepository,
+		cropRepository:            CropRepository,
 	}
 }
 
@@ -39,14 +42,13 @@ func (o OrderService) GenerateCropsFromOrder(order formDtos.Order) ([]dtos.Crop,
 	crops := []dtos.Crop{}
 
 	// Get seed instructions
-	seedInstructions, err := o.seedInstructionRepository.GetSeedInstructionsBySeedId(ctx, order.SeedID)
+	seedInstruction, err := o.seedInstructionRepository.GetSeedInstructionBySeedId(ctx, order.SeedID)
 	if err != nil {
 		return crops, errors.New("unable to get seed instructions")
 	}
-	seedInstructionsModel := dtos.SeedInstruction{}.FromDatabaseModel(seedInstructions)
 
 	// Calculate number of trays needed
-	yieldWithMargin := seedInstructionsModel.YieldGrams - (seedInstructionsModel.YieldGrams * YIELD_ERROR_MARGIN_PERCENTAGE / 100)
+	yieldWithMargin := seedInstruction.YieldGrams - (seedInstruction.YieldGrams * YIELD_ERROR_MARGIN_PERCENTAGE / 100)
 	traysToPlant := int(math.Ceil(float64(order.Yield) / float64(yieldWithMargin)))
 
 	// Calculate dates based on whether it's a harvest date or start date
@@ -64,63 +66,47 @@ func (o OrderService) GenerateCropsFromOrder(order formDtos.Order) ([]dtos.Crop,
 		harvestTime = orderDateTime
 
 		// Start from harvest and work backwards through lights period
-		lightsStart = harvestTime.Add(-time.Duration(seedInstructionsModel.LightsHours) * time.Hour)
+		lightsStart = harvestTime.Add(-time.Duration(seedInstruction.LightsHours) * time.Hour)
 
 		// Create a separate variable for stacking calculation
 		var stackingBase time.Time = lightsStart
 
-		if seedInstructionsModel.BlackoutHours > 0 {
+		if seedInstruction.BlackoutHours > 0 {
 			// Calculate blackout start time
-			blackoutTime := lightsStart.Add(-time.Duration(seedInstructionsModel.BlackoutHours) * time.Hour)
+			blackoutTime := lightsStart.Add(-time.Duration(seedInstruction.BlackoutHours) * time.Hour)
 			blackoutStart = &blackoutTime
 			// Use the blackout time for stacking calculations
 			stackingBase = blackoutTime // Create a new value, not a pointer reference
 		}
 
 		// Calculate stacking start from stackingBase
-		stackingStart = stackingBase.Add(-time.Duration(seedInstructionsModel.StackingHours) * time.Hour)
+		stackingStart = stackingBase.Add(-time.Duration(seedInstruction.StackingHours) * time.Hour)
 
 		// If soaking is needed, calculate backwards from stacking
-		if seedInstructionsModel.SoakingHours > 0 {
-			soakTime := stackingStart.Add(-time.Duration(seedInstructionsModel.SoakingHours) * time.Hour)
+		if seedInstruction.SoakingHours > 0 {
+			soakTime := stackingStart.Add(-time.Duration(seedInstruction.SoakingHours) * time.Hour)
 			soakingStart = &soakTime
-		}
-		// Print all variables using log
-		log.Printf("harvestTime: %v\n", harvestTime)
-		log.Printf("lightsStart: %v\n", lightsStart)
-		log.Printf("stackingStart: %v\n", stackingStart)
-		if soakingStart != nil {
-			log.Printf("soakingStart: %v\n", *soakingStart)
-		} else {
-			log.Println("soakingStart: nil")
-		}
-		if blackoutStart != nil {
-			log.Printf("blackoutStart: %v\n", *blackoutStart)
-		} else {
-			log.Println("blackoutStart: nil")
 		}
 	} else {
 		// Working forwards from start date
-		// Handle soaking phase if needed
-		if seedInstructionsModel.SoakingHours > 0 {
-			// Create a new time value for soaking
+		if seedInstruction.SoakingHours > 0 {
 			soakTime := orderDateTime // Create new value
 			soakingStart = &soakTime  // Store pointer to new value
-			stackingStart = orderDateTime.Add(time.Duration(seedInstructionsModel.SoakingHours) * time.Hour)
+			stackingStart = orderDateTime.Add(time.Duration(seedInstruction.SoakingHours) * time.Hour)
 		} else {
 			stackingStart = orderDateTime
 		}
 
-		if seedInstructionsModel.BlackoutHours > 0 {
-			blackoutTime := stackingStart.Add(time.Duration(seedInstructionsModel.StackingHours) * time.Hour)
+		if seedInstruction.BlackoutHours > 0 {
+			blackoutTime := stackingStart.Add(time.Duration(seedInstruction.StackingHours) * time.Hour)
 			blackoutStart = &blackoutTime // Store pointer to new value
-			lightsStart = blackoutTime.Add(time.Duration(seedInstructionsModel.BlackoutHours) * time.Hour)
+			lightsStart = blackoutTime.Add(time.Duration(seedInstruction.BlackoutHours) * time.Hour)
 		} else {
-			lightsStart = stackingStart.Add(time.Duration(seedInstructionsModel.StackingHours) * time.Hour)
+			lightsStart = stackingStart.Add(time.Duration(seedInstruction.StackingHours) * time.Hour)
 		}
 
 		// Calculate harvest time from end of lights period
-		harvestTime = lightsStart.Add(time.Duration(seedInstructionsModel.LightsHours) * time.Hour)
+		harvestTime = lightsStart.Add(time.Duration(seedInstruction.LightsHours) * time.Hour)
 	}
 
 	codeStart := stackingStart
@@ -154,11 +140,7 @@ func (o OrderService) GenerateCropsFromOrder(order formDtos.Order) ([]dtos.Crop,
 
 // GenerateCode is now a thin wrapper around the CodeGenerator
 func (o *OrderService) GenerateCode(seedId uuid.UUID, start time.Time, end time.Time) (string, error) {
-	return o.codeGenerator.GenerateCode(context.Background(), struct {
-		SeedID    uuid.UUID
-		StartDate time.Time
-		EndDate   time.Time
-	}{
+	return o.codeGenerator.GenerateCode(context.Background(), GenerateCodeInput{
 		SeedID:    seedId,
 		StartDate: start,
 		EndDate:   end,

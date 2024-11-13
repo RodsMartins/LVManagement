@@ -84,7 +84,7 @@ func (h AdminSeedHandLer) SeedForm(w http.ResponseWriter, r *http.Request) {
 
 		seedModel = seedModel.FromDatabaseModel(seed)
 
-		seedInstruction, err := h.Repository.GetSeedInstructionsBySeedId(ctx, pgtype.UUID{Bytes: uuid.MustParse(seedId), Valid: true})
+		seedInstruction, err := h.Repository.GetSeedInstructionBySeedId(ctx, pgtype.UUID{Bytes: uuid.MustParse(seedId), Valid: true})
 		if err != nil {
 			http.Error(w, "Seed instruction not found", http.StatusNotFound)
 			return
@@ -158,7 +158,7 @@ func (h AdminSeedHandLer) UpdateSeed(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := context.Background()
-	seedInstruction, err := h.Repository.GetSeedInstructionsBySeedId(ctx, pgtype.UUID{Bytes: uuid.MustParse(seedId), Valid: true})
+	seedInstruction, err := h.Repository.GetSeedInstructionBySeedId(ctx, pgtype.UUID{Bytes: uuid.MustParse(seedId), Valid: true})
 	if err != nil {
 		http.Error(w, "Seed not found", http.StatusNotFound)
 		return

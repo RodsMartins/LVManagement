@@ -105,11 +105,11 @@ func nav(r *http.Request) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = navButton("Crops", "/farm", CarrotIcon, r).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = navButton("Crops", "/crop", CarrotIcon, r).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = navButton("Create an order", "/farm/crops/upsert", TractorIcon, r).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = navButton("Create an order", "/order/new", TractorIcon, r).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

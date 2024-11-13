@@ -61,3 +61,17 @@ func (s SeedInstruction) ToNewSeedInstructionParams() database.NewSeedInstructio
 		SpecialTreatment:  pgtype.Text{String: s.SpecialTreatment, Valid: true},
 	}
 }
+
+func (s SeedInstruction) ToUpdateSeedInstructionParams() database.UpdateSeedInstructionParams {
+	return database.UpdateSeedInstructionParams{
+		SeedInstructionID: pgtype.UUID{Bytes: s.SeedInstructionID, Valid: true},
+		SeedID:            pgtype.UUID{Bytes: s.SeedID, Valid: true},
+		SeedGrams:         pgtype.Int4{Int32: int32(s.SeedGrams), Valid: true},
+		SoakingHours:      pgtype.Int4{Int32: int32(s.SoakingHours), Valid: true},
+		StackingHours:     pgtype.Int4{Int32: int32(s.StackingHours), Valid: true},
+		BlackoutHours:     pgtype.Int4{Int32: int32(s.BlackoutHours), Valid: true},
+		LightsHours:       pgtype.Int4{Int32: int32(s.LightsHours), Valid: true},
+		YieldGrams:        pgtype.Int4{Int32: int32(s.YieldGrams), Valid: true},
+		SpecialTreatment:  pgtype.Text{String: s.SpecialTreatment, Valid: true},
+	}
+}

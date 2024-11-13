@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	//"log"
 	"log/slog"
 	"lvm/database"
@@ -21,6 +22,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+
 	//"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	//"github.com/jackc/pgx/v5/pgtype"
@@ -87,7 +89,8 @@ func main() {
 		r.NotFound(notFoundHandler.NotFound)
 
 		r.Mount("/my-day", routes.MyDayRoutes())
-		r.Mount("/farm", routes.FarmRoutes(repository))
+		r.Mount("/crop", routes.CropRoutes(repository))
+		r.Mount("/order", routes.OrderRoutes(repository))
 		r.Mount("/admin", routes.AdminRoutes(repository))
 	})
 

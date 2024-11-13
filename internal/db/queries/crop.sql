@@ -1,4 +1,4 @@
--- name: ListCrop :one
+-- name: ListCrop :many
 SELECT * FROM Crops;
 
 -- name: GetCrop :one

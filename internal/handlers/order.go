@@ -3,9 +3,8 @@ package handlers
 import (
 	"fmt"
 	"lvm/internal/db/repositories"
-	"lvm/internal/dtos"
 	formDtos "lvm/internal/dtos/form"
-	"lvm/internal/services"
+	"lvm/internal/services/order"
 	"lvm/internal/templates/components/form"
 	pages "lvm/internal/templates/pages/farm"
 	"net/http"
@@ -20,33 +19,25 @@ type FarmHandler struct {
 	BaseHandler
 	cropRepository repositories.CropRepository
 	seedRepository repositories.SeedRepository
-	orderService   services.OrderService
+	cropHandler    CropHandler
+	orderService   order.OrderService
 }
 
-func NewFarmHandler(
+func NewOrderHandler(
 	cropRepository repositories.CropRepository,
 	seedRepository repositories.SeedRepository,
-	orderService services.OrderService,
+	orderService order.OrderService,
+	cropHandler CropHandler,
 ) *FarmHandler {
 	return &FarmHandler{
 		cropRepository: cropRepository,
 		seedRepository: seedRepository,
 		orderService:   orderService,
+		cropHandler:    cropHandler,
 	}
 }
 
-func (h FarmHandler) ViewCrops(w http.ResponseWriter, r *http.Request) {
-	template := pages.Crops(r)
-
-	err := template.Render(r.Context(), w)
-
-	if err != nil {
-		http.Error(w, "Error rendering template", http.StatusInternalServerError)
-		return
-	}
-}
-
-func (h FarmHandler) CropForm(w http.ResponseWriter, r *http.Request) {
+func (h FarmHandler) OrderForm(w http.ResponseWriter, r *http.Request) {
 	var template templ.Component
 
 	seeds, err := h.seedRepository.ListSeeds(r.Context())
@@ -55,16 +46,9 @@ func (h FarmHandler) CropForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var seedList []dtos.Seed
-
 	options := make([]form.SelectOption, len(seeds))
 
-	for _, seed := range seeds {
-		seedModel := dtos.Seed{}.FromDatabaseModel(seed)
-		seedList = append(seedList, seedModel)
-	}
-
-	for i, seed := range seedList {
+	for i, seed := range seeds {
 		options[i] = form.SelectOption{Value: seed.SeedID.String(), Label: seed.Name}
 	}
 
@@ -78,7 +62,7 @@ func (h FarmHandler) CropForm(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h FarmHandler) NewCrop(w http.ResponseWriter, r *http.Request) {
+func (h FarmHandler) NewOrder(w http.ResponseWriter, r *http.Request) {
 	// Parse the form data
 	err := r.ParseForm()
 	if err != nil {
@@ -112,7 +96,7 @@ func (h FarmHandler) NewCrop(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Show the updated list of crops
-	h.ViewCrops(w, r)
+	h.cropHandler.ViewCrops(w, r)
 }
 
 func getAndValidateUpsertFields(crop *formDtos.Order, r *http.Request) (*formDtos.Order, error) {

@@ -48,8 +48,8 @@ templ nav(r *http.Request) {
 			<div class="space-y-4">
 				<nav class="flex-1 space-y-2">
 					@navButton("My day", "/my-day", HouseIcon, r)
-					@navButton("Crops", "/farm", CarrotIcon, r)
-					@navButton("Create an order", "/farm/crops/upsert", TractorIcon, r)
+					@navButton("Crops", "/crop", CarrotIcon, r)
+					@navButton("Create an order", "/order/new", TractorIcon, r)
 				</nav>
 				<hr class="border-gray-200"/>
 				<nav class="flex-1 space-y-2">

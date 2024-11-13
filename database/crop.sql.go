@@ -84,25 +84,38 @@ func (q *Queries) GetExistingCodesForSeed(ctx context.Context, arg GetExistingCo
 	return items, nil
 }
 
-const listCrop = `-- name: ListCrop :one
+const listCrop = `-- name: ListCrop :many
 SELECT crop_id, seed_id, soaking_start, stacking_start, blackout_start, lights_start, harvest, code, yield_grams FROM Crops
 `
 
-func (q *Queries) ListCrop(ctx context.Context) (Crop, error) {
-	row := q.db.QueryRow(ctx, listCrop)
-	var i Crop
-	err := row.Scan(
-		&i.CropID,
-		&i.SeedID,
-		&i.SoakingStart,
-		&i.StackingStart,
-		&i.BlackoutStart,
-		&i.LightsStart,
-		&i.Harvest,
-		&i.Code,
-		&i.YieldGrams,
-	)
-	return i, err
+func (q *Queries) ListCrop(ctx context.Context) ([]Crop, error) {
+	rows, err := q.db.Query(ctx, listCrop)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Crop
+	for rows.Next() {
+		var i Crop
+		if err := rows.Scan(
+			&i.CropID,
+			&i.SeedID,
+			&i.SoakingStart,
+			&i.StackingStart,
+			&i.BlackoutStart,
+			&i.LightsStart,
+			&i.Harvest,
+			&i.Code,
+			&i.YieldGrams,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const newCrop = `-- name: NewCrop :one

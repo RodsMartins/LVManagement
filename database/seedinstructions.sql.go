@@ -46,13 +46,13 @@ func (q *Queries) GetSeedInstruction(ctx context.Context, seedInstructionID pgty
 	return i, err
 }
 
-const getSeedInstructionsBySeedId = `-- name: GetSeedInstructionsBySeedId :one
+const getSeedInstructionBySeedId = `-- name: GetSeedInstructionBySeedId :one
 SELECT seed_instruction_id, seed_id, seed_grams, soaking_hours, stacking_hours, blackout_hours, lights_hours, yield_grams, special_treatment FROM Seed_Instructions
 WHERE seed_id = $1
 `
 
-func (q *Queries) GetSeedInstructionsBySeedId(ctx context.Context, seedID pgtype.UUID) (SeedInstruction, error) {
-	row := q.db.QueryRow(ctx, getSeedInstructionsBySeedId, seedID)
+func (q *Queries) GetSeedInstructionBySeedId(ctx context.Context, seedID pgtype.UUID) (SeedInstruction, error) {
+	row := q.db.QueryRow(ctx, getSeedInstructionBySeedId, seedID)
 	var i SeedInstruction
 	err := row.Scan(
 		&i.SeedInstructionID,

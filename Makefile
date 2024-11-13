@@ -19,6 +19,18 @@ dev:
 	make containers
 	go build -o ./tmp/$(APP_NAME) ./cmd/$(APP_NAME)/main.go && air
 
+.PHONY: watch-all
+watch-all:
+	tmux new-session -d -s lvman \; \
+		rename-window 'LV Management' \; \
+		send-keys 'make dev' C-m \; \
+		split-window -h \; \
+		send-keys 'make templ-watch' C-m \; \
+		split-window -v \; \
+ 		send-keys 'make tailwind-watch' C-m \; \
+		select-pane -t 0 \; \
+		attach
+
 .PHONY: containers
 containers:
 	docker compose up -d

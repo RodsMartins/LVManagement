@@ -5,7 +5,7 @@ SELECT * FROM Seed_Instructions;
 SELECT * FROM Seed_Instructions
 WHERE seed_instruction_id = $1;
 
--- name: GetSeedInstructionsBySeedId :one
+-- name: GetSeedInstructionBySeedId :one
 SELECT * FROM Seed_Instructions
 WHERE seed_id = $1;
 

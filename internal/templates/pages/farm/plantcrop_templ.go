@@ -50,7 +50,7 @@ func CropForm(r *http.Request, seedOptions []form.SelectOption) templ.Component 
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <div class=\"w-3/4\"><form hx-post=\"/farm/crops/new\" hx-swap=\"none\" class=\"space-y-4\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <div class=\"w-3/4\"><form hx-post=\"/order/new\" hx-swap=\"none\" class=\"space-y-4\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

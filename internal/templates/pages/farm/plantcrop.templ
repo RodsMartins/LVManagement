@@ -13,7 +13,7 @@ templ CropForm(r *http.Request, seedOptions []form.SelectOption) {
 		@ui.H2("Create an order")
 		<div class="w-3/4">
 			<form
-				hx-post="/farm/crops/new"
+				hx-post="/order/new"
 				hx-swap="none"
 				class="space-y-4"
 			>
