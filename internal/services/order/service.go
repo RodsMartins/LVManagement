@@ -44,7 +44,7 @@ func (o OrderService) GenerateCropsFromOrder(order formDtos.Order) ([]dtos.Crop,
 	// Get seed instructions
 	seedInstruction, err := o.seedInstructionRepository.GetSeedInstructionBySeedId(ctx, order.SeedID)
 	if err != nil {
-		return crops, errors.New("unable to get seed instructions")
+		return crops, errors.New("unable to get seed instructions: " + err.Error())
 	}
 
 	// Calculate number of trays needed

@@ -3,10 +3,132 @@ package myday
 import (
 	"lvm/internal/templates/layouts"
 	"net/http"
+	"lvm/internal/dtos"
+	"lvm/internal/helpers"
 )
 
-templ MyDay(r *http.Request) {
-	@layouts.Base("My day page", r) {
-		Welcome, here you can find what tasks you need to do today!
+templ MyDay(r *http.Request, cropsActiveStages map[dtos.CropStage][]dtos.Crop, cropsNewStages map[dtos.CropStage][]dtos.Crop) {
+	@layouts.Base("My Day", r) {
+		<div class="container mx-auto p-4">
+			<div class="mb-4">
+				<div class="flex border-b">
+					<button 
+						class="px-4 py-2 -mb-px border-b-2 border-blue-500 text-blue-600" 
+						data-tab="tasks"
+					>
+						Tasks
+					</button>
+					<button 
+						class="px-4 py-2 text-gray-500" 
+						data-tab="active-crops"
+					>
+						Active Crops
+					</button>
+				</div>
+
+				<div id="tasks-content" class="tab-content">
+					<h1 class="text-2xl font-bold my-4">Today's Tasks</h1>
+					@renderCropStages(cropsNewStages, true)
+				</div>
+
+				<div id="active-crops-content" class="tab-content hidden">
+					<h1 class="text-2xl font-bold my-4">Active Crops by Phase</h1>
+					@renderCropStages(cropsActiveStages, false)
+				</div>
+			</div>
+		</div>
+
+		<script>
+			document.querySelectorAll('[data-tab]').forEach(tab => {
+				tab.addEventListener('click', () => {
+					const tabName = tab.getAttribute('data-tab');
+					
+					// Hide all tab contents
+					document.querySelectorAll('.tab-content').forEach(content => {
+						content.classList.add('hidden');
+					});
+
+					// Remove active styles from all tabs
+					document.querySelectorAll('[data-tab]').forEach(t => {
+						t.classList.remove('border-b-2', 'border-blue-500', 'text-blue-600');
+						t.classList.add('text-gray-500');
+					});
+
+					// Show selected tab content
+					document.getElementById(`${tabName}-content`).classList.remove('hidden');
+					
+					// Add active styles to selected tab
+					tab.classList.add('border-b-2', 'border-blue-500', 'text-blue-600');
+					tab.classList.remove('text-gray-500');
+				});
+			});
+		</script>
 	}
+}
+
+templ renderCropStages(cropsByStage map[dtos.CropStage][]dtos.Crop, isTaskView bool) {
+	if isTaskView {
+		// Tasks view only shows crops for today
+		@renderStageSection(cropsByStage, dtos.SoakingStage, "Soaking Crops", "bg-blue-50")
+		@renderStageSection(cropsByStage, dtos.StackingStage, "Stacking Crops", "bg-green-50")
+		@renderStageSection(cropsByStage, dtos.BlackoutStage, "Blackout Crops", "bg-gray-50")
+		@renderStageSection(cropsByStage, dtos.LightsStage, "Lights Crops", "bg-yellow-50")
+		@renderStageSection(cropsByStage, dtos.HarvestStage, "Harvest Crops", "bg-red-50")
+	} else {
+		// Active crops view shows all crops in each stage
+		@renderFullStageSection(cropsByStage, dtos.SoakingStage, "Soaking Crops", "bg-blue-50")
+		@renderFullStageSection(cropsByStage, dtos.StackingStage, "Stacking Crops", "bg-green-50")
+		@renderFullStageSection(cropsByStage, dtos.BlackoutStage, "Blackout Crops", "bg-gray-50")
+		@renderFullStageSection(cropsByStage, dtos.LightsStage, "Lights Crops", "bg-yellow-50")
+		@renderFullStageSection(cropsByStage, dtos.HarvestStage, "Harvest Crops", "bg-red-50")
+	}
+}
+
+templ renderStageSection(cropsByStage map[dtos.CropStage][]dtos.Crop, stage dtos.CropStage, title string, bgColor string) {
+	if len(cropsByStage[stage]) > 0 {
+		<section class="mb-6">
+			<h2 class="text-xl font-semibold mb-2">{ title }</h2>
+			<div class="grid gap-4">
+				for _, crop := range cropsByStage[stage] {
+					<div class={ "p-4 rounded-lg", bgColor }>
+						<p class="font-medium">Code: { crop.Code }</p>
+						if stage == dtos.SoakingStage && crop.SoakingStart != nil {
+							<p>Soak at { crop.SoakingStart.Format("15:04") }</p>
+						}
+						if stage == dtos.StackingStage {
+							<p>Stack at { crop.StackingStart.Format("15:04") }</p>
+						}
+						if stage == dtos.BlackoutStage && crop.BlackoutStart != nil {
+							<p>Blackout at { crop.BlackoutStart.Format("15:04") }</p>
+						}
+						if stage == dtos.LightsStage {
+							<p>Lights at { crop.LightsStart.Format("15:04") }</p>
+						}
+						if stage == dtos.HarvestStage {
+							<p>Harvest at { crop.Harvest.Format("15:04") }</p>
+						}
+					</div>
+				}
+			</div>
+		</section>
+	}
+}
+
+templ renderFullStageSection(cropsByStage map[dtos.CropStage][]dtos.Crop, stage dtos.CropStage, title string, bgColor string) {
+	<section class="mb-6">
+		<h2 class="text-xl font-semibold mb-2">{ title }</h2>
+		if len(cropsByStage[stage]) > 0 {
+			<div class="grid gap-4">
+				for _, crop := range cropsByStage[stage] {
+					<div class={ "p-4 rounded-lg", bgColor }>
+						<p class="font-medium">Code: { crop.Code }</p>
+						<p>Started: { helpers.FormatTime(helpers.Must(crop.GetStageStartDate(stage))) }</p>
+						<p>Duration: { helpers.FormatTime(helpers.Must(crop.GetStageEndDate(stage))) }</p>
+					</div>
+				}
+			</div>
+		} else {
+			<p class="text-gray-500">No crops in this stage</p>
+		}
+	</section>
 }

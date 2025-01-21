@@ -13,6 +13,7 @@ import (
 
 type CropRepository interface {
 	GetCrop(ctx context.Context, cropID uuid.UUID) (dtos.Crop, error)
+	ListCropsByDate(ctx context.Context, date time.Time) ([]dtos.Crop, error)
 	GetExistingCodesForSeed(ctx context.Context, input GetExistingCodesForSeedInput) ([]string, error)
 	ListCrop(ctx context.Context) ([]dtos.Crop, error)
 	NewCrop(ctx context.Context, params database.NewCropParams) (dtos.Crop, error)
@@ -68,6 +69,20 @@ func (r *cropRepository) GetExistingCodesForSeed(ctx context.Context, input GetE
 
 func (r *cropRepository) ListCrop(ctx context.Context) ([]dtos.Crop, error) {
 	crops, err := r.queries.ListCrop(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	dtoCrops := make([]dtos.Crop, len(crops))
+	for i, c := range crops {
+		dtoCrops[i] = dtos.CropFromDatabaseModel(c)
+	}
+
+	return dtoCrops, nil
+}
+
+func (r *cropRepository) ListCropsByDate(ctx context.Context, date time.Time) ([]dtos.Crop, error) {
+	crops, err := r.queries.ListCropsByDate(ctx, pgtype.Timestamp{Time: date, Valid: true})
 	if err != nil {
 		return nil, err
 	}

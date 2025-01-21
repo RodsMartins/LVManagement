@@ -5,6 +5,7 @@ import (
 	"lvm/database"
 	"lvm/internal/db/repositories"
 	"lvm/internal/dtos"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
@@ -26,6 +27,11 @@ func (m *MockCropRepository) GetExistingCodesForSeed(ctx context.Context, input 
 
 func (m *MockCropRepository) ListCrop(ctx context.Context) ([]dtos.Crop, error) {
     args := m.Called(ctx)
+    return args.Get(0).([]dtos.Crop), args.Error(1)
+}
+
+func (m *MockCropRepository) ListCropsByDate(ctx context.Context, date time.Time) ([]dtos.Crop, error) {
+    args := m.Called(ctx, date)
     return args.Get(0).([]dtos.Crop), args.Error(1)
 }
 

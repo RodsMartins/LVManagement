@@ -88,7 +88,7 @@ func main() {
 		notFoundHandler := handlers.NotFoundHandler{}
 		r.NotFound(notFoundHandler.NotFound)
 
-		r.Mount("/my-day", routes.MyDayRoutes())
+		r.Mount("/my-day", routes.MyDayRoutes(repository))
 		r.Mount("/crop", routes.CropRoutes(repository))
 		r.Mount("/order", routes.OrderRoutes(repository))
 		r.Mount("/admin", routes.AdminRoutes(repository))

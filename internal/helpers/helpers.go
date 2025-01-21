@@ -3,6 +3,7 @@ package helpers
 import (
 	"encoding/hex"
 	"fmt"
+	"time"
 
 	"github.com/a-h/templ"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -13,6 +14,10 @@ func Must[T any](v T, err error) T {
 		panic(err)
 	}
 	return v
+}
+
+func FormatTime(t time.Time) string {
+	return t.Format("2006-01-02 15:04:05")
 }
 
 func encodeUUID(src [16]byte) string {

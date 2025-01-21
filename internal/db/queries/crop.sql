@@ -27,3 +27,12 @@ WHERE c.code ~ ('^' || sqlc.arg('first_letter') || '\d+$')
     OR (c.harvest BETWEEN sqlc.arg('start_date') AND sqlc.arg('end_date'))
   )
 ORDER BY c.code;
+
+-- name: ListCropsByDate :many
+-- @arg date
+SELECT 
+  *
+FROM Crops c
+WHERE 
+    (c.soaking_start IS NOT NULL AND sqlc.arg('date') BETWEEN c.soaking_start AND c.harvest)
+    OR (sqlc.arg('date') BETWEEN c.stacking_start AND c.harvest);

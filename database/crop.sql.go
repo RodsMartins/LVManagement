@@ -118,6 +118,46 @@ func (q *Queries) ListCrop(ctx context.Context) ([]Crop, error) {
 	return items, nil
 }
 
+const listCropsByDate = `-- name: ListCropsByDate :many
+SELECT 
+  crop_id, seed_id, soaking_start, stacking_start, blackout_start, lights_start, harvest, code, yield_grams
+FROM Crops c
+WHERE 
+    (c.soaking_start IS NOT NULL AND $1 BETWEEN c.soaking_start AND c.harvest)
+    OR ($1 BETWEEN c.stacking_start AND c.harvest)
+`
+
+// @arg date
+func (q *Queries) ListCropsByDate(ctx context.Context, date pgtype.Timestamp) ([]Crop, error) {
+	rows, err := q.db.Query(ctx, listCropsByDate, date)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Crop
+	for rows.Next() {
+		var i Crop
+		if err := rows.Scan(
+			&i.CropID,
+			&i.SeedID,
+			&i.SoakingStart,
+			&i.StackingStart,
+			&i.BlackoutStart,
+			&i.LightsStart,
+			&i.Harvest,
+			&i.Code,
+			&i.YieldGrams,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const newCrop = `-- name: NewCrop :one
 INSERT INTO Crops (crop_id, seed_id, soaking_start, stacking_start, blackout_start, lights_start, harvest, code)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)

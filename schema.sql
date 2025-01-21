@@ -73,11 +73,11 @@ CREATE TABLE IF NOT EXISTS seed_instructions (
 CREATE TABLE IF NOT EXISTS crops (
   crop_id uuid PRIMARY KEY,
   seed_id uuid,
-  soaking_start timestamp,
-  stacking_start timestamp,
-  blackout_start timestamp,
-  lights_start timestamp,
-  harvest timestamp,
+  soaking_start timestamptz,
+  stacking_start timestamptz,
+  blackout_start timestamptz,
+  lights_start timestamptz,
+  harvest timestamptz,
   code varchar,
   yield_grams int null,
   FOREIGN KEY (seed_id) REFERENCES seeds (seed_id)

@@ -52,7 +52,7 @@ func (r *seedInstructionRepository) GetSeedInstruction(ctx context.Context, seed
 }
 
 func (r *seedInstructionRepository) GetSeedInstructionBySeedId(ctx context.Context, seedID uuid.UUID) (dtos.SeedInstruction, error) {
-	seedinstruction, err :=  r.queries.GetSeedInstructionBySeedId(ctx, pgtype.UUID{Bytes: seedID})
+	seedinstruction, err :=  r.queries.GetSeedInstructionBySeedId(ctx, pgtype.UUID{Bytes: seedID, Valid: true})
 	if err != nil {
 		return dtos.SeedInstruction{}, err
 	}

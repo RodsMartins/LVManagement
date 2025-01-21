@@ -1,10 +1,22 @@
 package dtos
 
 import (
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
+	"fmt"
 	"lvm/database"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
+)
+
+type CropStage int
+
+const (
+    SoakingStage CropStage = iota
+    StackingStage
+    BlackoutStage
+    LightsStage
+    HarvestStage
 )
 
 // Crop represents the data transfer object for a crop
@@ -42,6 +54,56 @@ func NewCrop(
 		Harvest:       harvest,
 		YieldGrams:    yieldGrams,
 	}
+}
+
+func (c *Crop) GetStageStartDate(stage CropStage) (time.Time, error) {
+    switch stage {
+    case SoakingStage:
+        if c.SoakingStart == nil {
+            return time.Time{}, fmt.Errorf("soaking start is not set")
+        }
+        return *c.SoakingStart, nil
+    case StackingStage:
+        return c.StackingStart, nil
+    case BlackoutStage:
+        if c.BlackoutStart == nil {
+            return time.Time{}, fmt.Errorf("blackout start is not set")
+        }
+        return *c.BlackoutStart, nil
+    case LightsStage:
+        return c.LightsStart, nil
+    case HarvestStage:
+        return c.Harvest, nil
+    default:
+        return time.Time{}, fmt.Errorf("invalid stage")
+    }
+}
+
+func (c *Crop) GetStageEndDate(stage CropStage) (time.Time, error) {
+    switch stage {
+    case SoakingStage:
+        if c.SoakingStart == nil {
+            return time.Time{}, fmt.Errorf("soaking start is not set")
+        }
+        return c.StackingStart, nil
+    case StackingStage:
+        if c.BlackoutStart == nil {
+            // If no blackout stage, use lights start as end
+            return c.LightsStart, nil
+        }
+        return *c.BlackoutStart, nil
+    case BlackoutStage:
+        if c.BlackoutStart == nil {
+            return time.Time{}, fmt.Errorf("blackout start is not set")
+        }
+        return c.LightsStart, nil
+    case LightsStage:
+        return c.Harvest, nil
+    case HarvestStage:
+        return c.Harvest, nil
+    default:
+        return time.Time{}, fmt.Errorf("invalid stage")
+    }
 }
 
 func (c *Crop) ToDatabaseModel() database.Crop {
@@ -82,6 +144,117 @@ func (c *Crop) ToDatabaseModel() database.Crop {
 		Code:          pgtype.Text{String: c.Code, Valid: true},
 		YieldGrams:    yieldGrams,
 	}
+}
+
+func (c *Crop) GetActiveStages(date time.Time) []CropStage {
+    var stages []CropStage
+    
+    // Convert input date to UTC
+    checkDateUTC := date.UTC()
+    
+    // Helper function to check if date is between stage transitions
+    isActiveDuring := func(stageStart, nextStageStart *time.Time) bool {
+        if stageStart == nil {
+            return false
+        }
+        
+        // Convert stage date to UTC
+        stageStartUTC := stageStart.UTC()
+        
+        // Check if checkDate is after or equal to stage start
+        if !checkDateUTC.Before(stageStartUTC) {
+            // If there's no next stage, this stage is still active
+            if nextStageStart == nil {
+                return true
+            }
+            
+            // Convert next stage date to UTC
+            nextStageStartUTC := nextStageStart.UTC()
+            
+            // Check if checkDate is before next stage
+            return checkDateUTC.Before(nextStageStartUTC)
+        }
+        
+        return false
+    }
+    
+    // Check Soaking Stage
+    if isActiveDuring(c.SoakingStart, &c.StackingStart) {
+        stages = append(stages, SoakingStage)
+    }
+    
+    // Check Stacking Stage
+    var nextStage *time.Time
+    if c.BlackoutStart != nil {
+        nextStage = c.BlackoutStart
+    } else {
+        nextStage = &c.LightsStart
+    }
+    if isActiveDuring(&c.StackingStart, nextStage) {
+        stages = append(stages, StackingStage)
+    }
+    
+    // Check Blackout Stage
+    if c.BlackoutStart != nil && isActiveDuring(c.BlackoutStart, &c.LightsStart) {
+        stages = append(stages, BlackoutStage)
+    }
+    
+    // Check Lights Stage
+    if isActiveDuring(&c.LightsStart, &c.Harvest) {
+        stages = append(stages, LightsStage)
+    }
+    
+    // Check Harvest Stage (assuming it's the final stage with no end date)
+    if isActiveDuring(&c.Harvest, nil) {
+        stages = append(stages, HarvestStage)
+    }
+    
+    return stages
+}
+
+func (c *Crop) GetNewStages(date time.Time) []CropStage {
+    var stages []CropStage
+    
+    // Convert input date to UTC, keeping the same instant in time
+    checkDateUTC := date.UTC()
+    
+    // Helper function to normalize stage dates to UTC and check if they occur on the same day
+    isSameDay := func(stageDate *time.Time) bool {
+        if stageDate == nil {
+            return false
+        }
+        
+        // Convert stage date to UTC
+        stageDateUTC := stageDate.UTC()
+        
+        // Check if dates are on the same day in UTC
+        return checkDateUTC.Year() == stageDateUTC.Year() &&
+            checkDateUTC.Month() == stageDateUTC.Month() &&
+            checkDateUTC.Day() == stageDateUTC.Day()
+    }
+    
+    // Check each stage using the helper function
+    if c.SoakingStart != nil && isSameDay(c.SoakingStart) {
+        stages = append(stages, SoakingStage)
+    }
+    
+    if isSameDay(&c.StackingStart) {
+        stages = append(stages, StackingStage)
+    }
+    
+    if c.BlackoutStart != nil && isSameDay(c.BlackoutStart) {
+        stages = append(stages, BlackoutStage)
+    }
+    
+    if isSameDay(&c.LightsStart) {
+        stages = append(stages, LightsStage)
+    }
+    
+    if isSameDay(&c.Harvest) {
+        stages = append(stages, HarvestStage)
+    }
+    
+    return stages
 }
 
 func (crop *Crop) GetNewCropParams() database.NewCropParams {
